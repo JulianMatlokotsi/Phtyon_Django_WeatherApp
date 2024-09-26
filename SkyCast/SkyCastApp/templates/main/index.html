@@ -1,0 +1,99 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>SkyCast App</title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">SkyCast</a>
+            <button id="theme-toggle" class="btn btn-outline-light ml-auto">Switch to Dark Mode</button>
+        </div>
+    </nav>
+
+    <!-- Jumbotron -->
+    <div class="jumbotron jumbotron-fluid text-center">
+        <div class="container">
+            <h1 class="display-4">Explore Your City's Weather Now</h1>
+            <p class="lead">Just enter your city name to see the current weather and forecast instantly.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <form method="POST" class="form-inline justify-content-center mb-5">
+            {% csrf_token %}
+            <div class="form-group mx-sm-3 mb-2">
+                <input type="text" class="form-control" name="city" placeholder="Enter city name">
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Get Weather</button>
+        </form>
+
+        <div id="loading-spinner" class="spinner-border text-primary" role="status" style="display: none;">
+            <span class="sr-only">Loading...</span>
+        </div>
+
+        {% if weather_data.error %}
+        <div class="alert alert-danger" role="alert">
+            {{ weather_data.error }}
+        </div>
+        {% endif %}
+
+        {% if weather_data %}
+        <div class="card text-center mb-5">
+            <div class="card-body">
+                <h5 class="card-title">{{ weather_data.city }}, {{ weather_data.country_code }}</h5>
+                <p class="card-text">Temperature: {{ weather_data.temp }}°C</p>
+                <p class="card-text">Pressure: {{ weather_data.pressure }} hPa</p>
+                <p class="card-text">Humidity: {{ weather_data.humidity }}%</p>
+                <p class="card-text">Condition: {{ weather_data.description }}</p>
+                <img src="http://openweathermap.org/img/w/{{ weather_data.icon }}.png" alt="Weather Icon" class="weather-icon" style="width:50px;">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if forecast_data %}
+        <div class="container mt-5">
+            <h2 class="text-center">5-Day Forecast</h2>
+            <div class="row">
+                {% for forecast in forecast_data.list %}
+                <div class="col-md-2 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ forecast.dt_txt|slice:":10" }}</h5> 
+                            <p class="card-text">{{ forecast.dt_txt|date:"l, H:i" }}</p> 
+                            <p class="card-text">Temp: {{ forecast.main.temp }}°C</p>
+                            <p class="card-text">Condition: {{ forecast.weather.0.description }}</p>
+                            <img src="http://openweathermap.org/img/w/{{ forecast.weather.0.icon }}.png" alt="Weather Icon" class="weather-icon" style="width:50px;">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    </br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <p>&copy; 2024 SkyCast App. Powered by Django and OpenWeather API.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+
+</html>
